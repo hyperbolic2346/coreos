@@ -1,0 +1,10 @@
+[Unit]
+Description=Heatmap generation timer for insurgency
+Requires=docker.service
+
+[Timer]
+OnCalendar=05:05
+Persistent=true
+
+[X-Fleet]
+X-ConditionMachineOf=hlstatsx_heatmaps.service

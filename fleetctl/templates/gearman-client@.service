@@ -1,0 +1,32 @@
+[Unit]
+Description=gearman-client
+
+After=docker.service
+After=security_camera.mount
+After=docker_configs.mount
+
+Requires=security_camera.mount
+Requires=docker.service
+Requires=docker_configs.mount
+
+[Service]
+# Let processes take awhile to start up (for first run Docker containers)
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill gearman-client.%i
+ExecStartPre=-/usr/bin/docker rm gearman-client.%i
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/gearman-client"
+ExecStart=/bin/sh -c "/usr/bin/docker run --net host --name gearman-client.%i -v /docker_configs/gearman-client:/etc/confd -v /security_camera:/fileserv/security_camera -p 9002:9002 `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/gearman-client"
+
+ExecStop=/usr/bin/docker stop gearman-client.%i
+
+RestartSec=5
+Restart=always
+
+[X-Fleet]
+Conflicts=gearman-client@*.service

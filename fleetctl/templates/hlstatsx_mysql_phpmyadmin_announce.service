@@ -1,0 +1,20 @@
+[Unit]
+Description=Announce hlstatsx phpmyadmin website
+
+Requires=etcd.service
+Requires=hlstatsx_mysql_phpmyadmin.service
+
+After=etcd.service
+After=hlstatsx_mysql_phpmyadmin.service
+
+BindsTo=hlstatsx_mysql_phpmyadmin.service
+
+[Service]
+ExecStart=/bin/sh -c "while true; do etcdctl set /services/webservers/stats_phpmyadmin '{\"ip\": \"%H\",\"port\": \"8878\",\"internal\": true}' --ttl 60;sleep 45;done"
+ExecStop=/usr/bin/etcdctl rm /services/webservers/stats_phpmyadmin
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+X-ConditionMachineOf=hlstatsx_mysql_phpmyadmin.service

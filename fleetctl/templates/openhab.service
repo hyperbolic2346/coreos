@@ -1,0 +1,30 @@
+[Unit]
+Description=openhab
+
+After=docker.service
+After=openhab_config.mount
+
+Requires=docker.service
+Requires=openhab_config.mount
+
+[Service]
+# Let processes take awhile to start up (for first run Docker containers)
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill openhab
+ExecStartPre=-/usr/bin/docker rm openhab
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/openhab"
+ExecStart=/bin/sh -c "/usr/bin/docker run --net host --name openhab --privileged=true -v /openhab_config:/opt/openhab/configurations -p 9001:9001 -p 8443:8443 -p 8080:8080 `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/openhab"
+
+Restart=always
+RestartSec=5
+
+ExecStop=/usr/bin/docker stop openhab
+
+[X-Fleet]
+X-ConditionMachineMetadata=hardware=zwave

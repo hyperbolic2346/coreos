@@ -1,0 +1,19 @@
+[Unit]
+Description=docker_repo
+
+After=docker.service
+After=docker_repo.mount
+Before=docker_repo_announce.service
+
+Requires=docker.service
+Requires=docker_repo.mount
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill docker_repo
+ExecStartPre=-/usr/bin/docker rm docker_repo
+ExecStartPre=/usr/bin/docker pull registry
+ExecStart=/bin/sh -c "/usr/bin/docker run --name='docker_repo' -v /docker_repo:/docker_repo -e SEARCH_BACKEND=sqlalchemy -e SETTINGS_FLAVOR=local -e STORAGE_PATH=/docker_repo -p 5000:5000 registry"
+
+Restart=always
+RestartSec=5

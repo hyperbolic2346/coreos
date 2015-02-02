@@ -1,0 +1,22 @@
+[Unit]
+Description=Announce hlstatsx website
+
+Requires=etcd.service
+Requires=databases.mount
+Requires=hlstatsx.service
+
+After=etcd.service
+After=databases.mount
+After=hlstatsx.service
+
+BindsTo=hlstatsx.service
+
+[Service]
+ExecStart=/bin/sh -c "while true; do etcdctl set /services/webservers/stats '{\"ip\": \"%H\",\"port\": \"8885\"}' --ttl 60;sleep 45;done"
+ExecStop=/usr/bin/etcdctl rm /services/webservers/stats
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+X-ConditionMachineOf=hlstatsx.service

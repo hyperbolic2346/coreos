@@ -1,0 +1,20 @@
+[Unit]
+Description=Announce Gearmand
+
+Requires=etcd.service
+Requires=gearmand.service
+
+After=etcd.service
+After=gearmand.service
+
+BindsTo=gearmand.service
+
+[Service]
+ExecStart=/bin/sh -c "while true; do etcdctl set /services/gearmand '{\"ip\": \"%H\", \"port\": \"4730\"}' --ttl 60;sleep 45;done"
+ExecStop=/usr/bin/etcdctl rm /services/gearmand
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+X-ConditionMachineOf=gearmand.service

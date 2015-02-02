@@ -1,0 +1,33 @@
+[Unit]
+Description=insurgency
+
+After=docker_configs.mount
+After=docker.service
+Before=insurgency_dedicated@27015.service
+
+Requires=docker_configs.mount
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill insurgency
+ExecStartPre=-/usr/bin/docker rm insurgency
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/insurgency_dedicated"
+ExecStart=/bin/sh -c "/usr/bin/docker run --name insurgency -v /docker_configs/insurgency/confd:/etc/confd -v /docker_configs/insurgency/addons:/srv/insurgency/serverfiles/insurgency/addons -v /docker_configs/insurgency/mapcycle_cooperative.txt:/srv/insurgency/serverfiles/insurgency/mapcycle_cooperative.txt -v /docker_configs/insurgency/cfg:/srv/insurgency/serverfiles/insurgency/cfg -p 27015:27015 -p 27015:27015/udp -p 27005:27005/udp -p 27020:27020/udp `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/insurgency_dedicated /usr/local/bin/confd-watch"
+
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop insurgency
+
+[X-Fleet]
+X-ConditionMachineMetadata=speed=fast
+

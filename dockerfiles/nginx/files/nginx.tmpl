@@ -1,0 +1,39 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+
+    root /usr/share/nginx/html;
+
+    location /status {
+        allow 10.0.1.1/24;
+        deny all;
+        status;
+    }
+
+    location = /status.html {
+    }
+}
+
+{{ range gets "/services/webservers/*" }}
+server {
+    listen 80;
+
+    server_name {{base .Key}}.burntsheep.com;
+
+    location / {
+	{{$data := json .Value}}{{if $data.internal}}
+          allow 68.115.204.26;
+          allow 68.115.175.166;
+          allow 10.0.1.0/24;
+          deny all;
+	{{else}}
+	allow all;
+	{{end}}
+        proxy_pass http://{{$data := json .Value}}{{$data.ip}}:{{$data.port}};
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+{{ end }}

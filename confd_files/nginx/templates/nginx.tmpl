@@ -1,0 +1,45 @@
+server {
+    listen 80;
+
+    server_name fileserv.burntsheep.com;
+
+    location / {
+          allow 68.115.204.26;
+          allow 68.115.175.166;
+          allow 10.0.1.0/24;
+          deny all;
+        proxy_pass http://10.0.1.14:80;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+{{ range gets "/services/webservers/*" }}
+server {
+    listen 80;
+
+    server_name {{base .Key}}.burntsheep.com;
+
+    large_client_header_buffers 4 16k;
+
+    location / {
+	{{$data := json .Value}}{{if $data.internal}}
+        allow 68.115.204.26;
+        allow 68.115.175.166;
+        allow 10.0.1.0/24;
+        deny all;
+	{{else}}
+	allow all;
+	{{end}}
+        proxy_pass http://{{$data := json .Value}}{{$data.ip}}:{{$data.port}};
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_send_timeout 240s;
+        proxy_read_timeout 240s;
+    }
+}
+{{ end }}

@@ -1,0 +1,23 @@
+[Unit]
+Description=Announce Mysql
+
+Requires=etcd.service
+Requires=databases.mount
+Requires=mysql.service
+
+After=etcd.service
+After=databases.mount
+After=mysql.service
+
+BindsTo=mysql.service
+
+[Service]
+ExecStart=/bin/sh -c "while true; do etcdctl set /services/mysql/host \"%H\" --ttl 60; etcdctl set /services/mysql/port 3306 --ttl 60;sleep 45;done"
+ExecStop=/usr/bin/etcdctl rm /services/mysql/host
+ExecStop=/usr/bin/etcdctl rm /services/mysql/port
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+X-ConditionMachineOf=mysql.service

@@ -1,0 +1,25 @@
+[Unit]
+Description=gearmand
+
+After=docker.service
+Before=gearmand_announce.service
+
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill gearmand
+ExecStartPre=-/usr/bin/docker rm gearmand
+ExecStartPre=/usr/bin/docker pull pataquets/gearmand
+ExecStart=/usr/bin/docker run --name gearmand -p 4730:4730 pataquets/gearmand
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop gearmand

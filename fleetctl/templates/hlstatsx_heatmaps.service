@@ -1,0 +1,27 @@
+[Unit]
+Description=hlstatsx_heatmaps
+
+After=docker.service
+After=docker_configs.mount
+
+Requires=docker.service
+Requires=docker_configs.mount
+
+[Service]
+TimeoutStartSec=0
+Type=oneshot
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill hlstatsx_heatmaps
+ExecStartPre=-/usr/bin/docker rm hlstatsx_heatmaps
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/hlstatsx_heatmaps"
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/hlstatsx/mysql/host 2>&1 >/dev/null|grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStart=/bin/sh -c "/usr/bin/docker run --name hlstatsx_heatmaps -v /docker_configs/hlstatsx_heatmaps/heatmaps:/usr/local/heatmaps -v /docker_configs/hlstatsx/html:/usr/local/hlstatsx `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/hlstatsx_heatmaps"
+
+[X-Fleet]
+Conflicts=insurgency_dedicated.service
+Conflicts=motion.service

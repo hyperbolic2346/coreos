@@ -1,0 +1,25 @@
+[Unit]
+Description=UI for  Docker Repo
+
+Requires=etcd.service
+Requires=docker_repo.service
+
+After=etcd.service
+After=docker_repo.service
+
+BindsTo=docker_repo.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+ExecStartPre=-/usr/bin/docker kill docker_ui
+ExecStartPre=-/usr/bin/docker rm docker_ui
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStart=/bin/sh -c "docker run -p 9080:8080 --name=docker_ui -e REG1=http://`etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port/ atcol/docker-registry-ui"
+ExecStop=/usr/bin/docker stop docker_ui
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+X-ConditionMachineOf=docker_repo.service

@@ -1,0 +1,35 @@
+[Unit]
+Description=motion service
+
+After=etcd.service
+After=docker.service
+After=security_camera.mount
+After=docker_configs.mount
+Before=motion_announce.service
+
+Requires=docker.service
+Requires=security_camera.mount
+Requires=etcd.service
+Requires=docker_configs.mount
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill motion
+ExecStartPre=-/usr/bin/docker rm motion
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/mysql/host 2>&1 >/dev/null|grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/motion"
+ExecStart=/bin/sh -c "/usr/bin/docker run --name motion --net=host -v /docker_configs/motion/motion_scripts:/motion_scripts -v /docker_configs/motion/confd:/etc/confd -v /docker_configs/motion/etc:/etc/motion -v /security_camera:/fileserv/security_camera `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/motion"
+
+ExecStop=/usr/bin/docker stop motion
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+Conflicts=insurgency_dedicated.service

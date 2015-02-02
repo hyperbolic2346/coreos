@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -eo pipefail
+
+export ETCD_PORT=${ETCD_PORT:-4001}
+export HOST_IP=${HOST_IP:-172.17.42.1}
+export ETCD=$HOST_IP:$ETCD_PORT
+
+echo "[motion-script-updates] booting container. ETCD: $ETCD."
+
+# Try to make initial configuration every 5 seconds until successful
+until confd -onetime -node $ETCD -config-file /etc/confd/conf.d/motion_script_update_images.toml; do
+    echo "[motion_script_updates] waiting for confd to create initial motion_script update."
+    sleep 5
+done
+
+# Put a continual polling `confd` process into the background to watch
+# for changes every 10 seconds
+echo "[motion_script_updates] confd is now monitoring etcd for changes..."
+confd -interval 10 -node $ETCD -config-file /etc/confd/conf.d/motion_script_update_images.toml &
+
+# Try to make initial configuration every 5 seconds until successful
+until confd -onetime -node $ETCD -config-file /etc/confd/conf.d/motion_script_update_video.toml; do
+    echo "[motion_script_updates] waiting for confd to create initial motion_script update."
+    sleep 5
+done
+
+# Put a continual polling `confd` process into the background to watch
+# for changes every 10 seconds
+echo "[motion_script_updates] confd is now monitoring etcd for changes..."
+confd -interval 10 -node $ETCD -config-file /etc/confd/conf.d/motion_script_update_video.toml
+

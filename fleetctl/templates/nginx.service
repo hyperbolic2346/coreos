@@ -1,0 +1,27 @@
+[Unit]
+Description=nginx
+
+After=docker.service
+After=docker_configs.mount
+
+Requires=docker_configs.mount
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill nginx
+ExecStartPre=-/usr/bin/docker rm nginx
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/nginx"
+ExecStart=/bin/sh -c "/usr/bin/docker run --net=host --name nginx -v /docker_configs/nginx:/etc/confd `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/nginx"
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop nginx

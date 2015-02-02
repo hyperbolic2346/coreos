@@ -1,0 +1,27 @@
+[Unit]
+Description=mumble
+
+After=docker_configs.mount
+After=docker.service
+Before=mumble@64738.service
+
+Requires=docker_configs.mount
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill mumble
+ExecStartPre=-/usr/bin/docker rm mumble
+ExecStartPre=/usr/bin/docker pull coppit/mumble-server
+ExecStart=/usr/bin/docker run --name mumble -v /docker_configs/mumble:/data -p 64738:64738 -p 64738:64738/udp coppit/mumble-server
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop mumble

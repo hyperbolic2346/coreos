@@ -1,0 +1,9 @@
+[Unit]
+Description=Weekly cleanup of stale docker images
+Requires=docker.service
+
+[Timer]
+OnCalendar=weekly
+
+[X-Fleet]
+Global=true

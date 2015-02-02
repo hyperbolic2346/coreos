@@ -1,0 +1,20 @@
+[Unit]
+Description=Announce Docker Repo
+
+Requires=etcd.service
+Requires=docker_repo.service
+
+After=etcd.service
+After=docker_repo.service
+
+BindsTo=docker_repo.service
+
+[Service]
+ExecStart=/bin/sh -c "while true; do etcdctl set /services/docker/repo/host \"%H\" --ttl 60; etcdctl set /services/docker/repo/port 5000 --ttl 60;sleep 45;done"
+ExecStop=/usr/bin/etcdctl rm /services/docker/repo
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+X-ConditionMachineOf=docker_repo.service

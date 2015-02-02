@@ -1,0 +1,14 @@
+[Mount]
+What=10.0.1.14:/mnt/fileserv/docker_repo
+Where=/docker_repo
+
+After=network.target
+After=local-fs.target
+After=network-online.target
+
+Requires=network-online.target
+Requires=network.target
+Requires=local-fs.target
+
+Type=nfs
+Options=rw,hard,async,intr,nolock,rsize=49152,wsize=49152

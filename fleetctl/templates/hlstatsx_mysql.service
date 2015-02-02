@@ -1,0 +1,27 @@
+[Unit]
+Description=hlstatsx_mysql
+
+After=databases.mount
+After=docker.service
+Before=databases_announce.service
+
+Requires=databases.mount
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill hlstatsx_db
+ExecStartPre=-/usr/bin/docker rm hlstatsx_db
+ExecStartPre=/usr/bin/docker pull mysql
+ExecStart=/usr/bin/docker run --name hlstatsx_db -v /databases/hlstatsx_mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=ARZLdnvM5Bdf8pWj -e MYSQL_USER=hlstatsx -e MYSQL_PASSWORD=YTGEZc7kV6pq -e MYSQL_DATABASE=hlstatsx -p 3307:3306 mysql
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop hlstatsx_db

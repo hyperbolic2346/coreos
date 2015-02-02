@@ -1,0 +1,31 @@
+[Unit]
+Description=hlstatsx
+
+After=docker.service
+After=docker_configs.mount
+
+Requires=docker_configs.mount
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill hlstatsx
+ExecStartPre=-/usr/bin/docker rm hlstatsx
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/hlstatsx/mysql/host 2>&1 >/dev/null|grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/hlstatsx"
+ExecStart=/bin/sh -c "/usr/bin/docker run -p 8885:80 --name hlstatsx -v /docker_configs/hlstatsx/html:/var/www/html -v /docker_configs/hlstatsx/confd:/etc/confd `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/hlstatsx"
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop hlstatsx
+
+[X-Fleet]
+Conflicts=insurgency_dedicated.service

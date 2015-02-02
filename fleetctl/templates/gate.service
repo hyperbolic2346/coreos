@@ -1,0 +1,29 @@
+[Unit]
+Description=gate
+
+After=docker.service
+After=docker_configs.mount
+After=security_camera.mount
+
+Requires=docker_configs.mount
+Requires=docker.service
+Requires=security_camera.mount
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill gate
+ExecStartPre=-/usr/bin/docker rm gate
+ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/gate"
+ExecStart=/bin/sh -c "/usr/bin/docker run -p 8880:80 --name gate -v /docker_configs/gate/site:/var/www -v /security_camera:/var/www/docs/media -v /docker_configs/gate/confd:/etc/confd `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/gate"
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop gate

@@ -1,0 +1,20 @@
+[Unit]
+Description=Announce Docker UI
+
+Requires=etcd.service
+Requires=docker_ui.service
+
+After=etcd.service
+After=docker_ui.service
+
+BindsTo=docker_ui.service
+
+[Service]
+ExecStart=/bin/sh -c "while true; do etcdctl set /services/webservers/docker_ui '{\"ip\": \"%H\",\"port\": \"9080\", \"internal\": true}' --ttl 60;sleep 45;done"
+ExecStop=/usr/bin/etcdctl rm /services/webservers/docker_ui
+
+Restart=always
+RestartSec=5
+
+[X-Fleet]
+X-ConditionMachineOf=docker_ui.service

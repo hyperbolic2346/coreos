@@ -1,0 +1,32 @@
+[Unit]
+Description=hlstatsx_mysql_phpmyadmin
+
+After=docker.service
+After=docker_configs.mount
+After=hlstatsx_mysql.service
+Before=hlstatsx_mysql_phpmyadmin_announce.service
+
+Requires=docker.service
+Requires=docker_configs.mount
+Requires=hlstatsx_mysql.service
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill hlstatsx_mysql_phpmyadmin
+ExecStartPre=-/usr/bin/docker rm hlstatsx_mysql_phpmyadmin
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull maxexcloo/phpmyadmin"
+ExecStart=/bin/sh -c "/usr/bin/docker run -p 8878:80 --name hlstatsx_mysql_phpmyadmin --link hlstatsx_db:mariadb --env=VIRTUAL_HOST=stats_phpmyadmin.burntsheep.com maxexcloo/phpmyadmin"
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop hlstatsx_mysql_phpmyadmin
+
+[X-Fleet]
+X-ConditionMachineOf=hlstatsx_mysql.service

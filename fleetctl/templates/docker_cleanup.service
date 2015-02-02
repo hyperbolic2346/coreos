@@ -1,0 +1,15 @@
+[Unit]
+Description=nukes old images from docker
+
+After=docker.service
+
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Type=oneshot
+
+ExecStart=/bin/sh -c "if [[ `docker images | grep '^<none>'` ]]; then docker rmi $(docker images | grep '^<none>' | awk '{print $3}'); fi"
+
+[X-Fleet]
+Global=true
