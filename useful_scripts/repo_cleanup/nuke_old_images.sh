@@ -1,3 +1,4 @@
+# taken from: https://gist.github.com/kwk/c5443f2a1abcf0eb1eaa
 #!/bin/bash
 
 set -eu
