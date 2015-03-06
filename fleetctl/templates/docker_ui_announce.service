@@ -10,7 +10,7 @@ After=docker_ui.service
 BindsTo=docker_ui.service
 
 [Service]
-ExecStart=/bin/sh -c "while true; do etcdctl set /services/webservers/docker_ui '{\"ip\": \"%H\",\"port\": \"9080\", \"internal\": true}' --ttl 60;sleep 45;done"
+ExecStart=/bin/bash -c "MY_IP=`getent hosts %H|/usr/bin/cut -d\" \" -f1`; while true; do etcdctl set /services/webservers/docker_ui '{\"ip\": \"'$MY_IP'\",\"port\": \"9080\"}' --ttl 60;sleep 45;done"
 ExecStop=/usr/bin/etcdctl rm /services/webservers/docker_ui
 
 Restart=always

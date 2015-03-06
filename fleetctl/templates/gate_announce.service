@@ -12,7 +12,7 @@ After=gate.service
 BindsTo=gate.service
 
 [Service]
-ExecStart=/bin/sh -c "while true; do etcdctl set /services/webservers/gate '{\"ip\": \"%H\",\"port\": \"8880\"}' --ttl 60;sleep 45;done"
+ExecStart=/bin/bash -c "MY_IP=`getent hosts %H|/usr/bin/cut -d\" \" -f1`; while true; do etcdctl set /services/webservers/gate '{\"ip\": \"'$MY_IP'\",\"port\": \"8880\"}' --ttl 60;sleep 45;done"
 ExecStop=/usr/bin/etcdctl rm /services/webservers/gate
 
 Restart=always

@@ -10,7 +10,7 @@ After=gearmand.service
 BindsTo=gearmand.service
 
 [Service]
-ExecStart=/bin/sh -c "while true; do etcdctl set /services/gearmand '{\"ip\": \"%H\", \"port\": \"4730\"}' --ttl 60;sleep 45;done"
+ExecStart=/bin/bash -c "MY_IP=`getent hosts %H|/usr/bin/cut -d\" \" -f1`; while true; do etcdctl set /services/gearmand '{\"ip\": \"'$MY_IP'\",\"port\": \"4730\"}' --ttl 60;sleep 45;done"
 ExecStop=/usr/bin/etcdctl rm /services/gearmand
 
 Restart=always
