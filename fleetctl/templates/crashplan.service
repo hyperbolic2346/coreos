@@ -1,0 +1,29 @@
+[Unit]
+Description=crashplan
+
+After=backup.mount
+After=docker_configs.mount
+After=docker.service
+Before=crashplan_announce.service
+
+Requires=backup.mount
+Requires=docker.service
+Requires=docker_configs.mount
+
+[Service]
+TimeoutStartSec=0
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+ExecStartPre=-/usr/bin/docker kill crashplan
+ExecStartPre=-/usr/bin/docker rm crashplan
+ExecStartPre=/usr/bin/docker pull gfjardim/crashplan
+ExecStart=/usr/bin/docker run --name crashplan --net=host -v /backup/crashplan:/data -v /docker_configs/crashplan:/config -v /etc/localtime:/etc/localtime:ro -p 4242:4242 -p 4243:4243 gfjardim/crashplan
+
+Restart=always
+RestartSec=5
+
+# Stop
+ExecStop=/usr/bin/docker stop crashplan
