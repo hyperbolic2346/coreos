@@ -10,7 +10,7 @@ After=hlstatsx_scripts.service
 BindsTo=hlstatsx_scripts.service
 
 [Service]
-ExecStart=/bin/sh -c "while true; do etcdctl set /services/hlstatsx/scripts/host \"%H\" --ttl 60; etcdctl set /services/hlstatsx/scripts/port 27500 --ttl 60;sleep 45;done"
+ExecStart=/bin/bash -c "MY_IP=`getent hosts %H|/usr/bin/cut -d\" \" -f1`; while true; do etcdctl set /services/hlstatsx/scripts/host \"$MY_IP\" --ttl 60; etcdctl set /services/hlstatsx/scripts/port 27500 --ttl 60;sleep 45;done"
 ExecStop=/usr/bin/etcdctl rm /services/hlstatsx/scripts/host
 ExecStop=/usr/bin/etcdctl rm /services/hlstatsx/scripts/port
 

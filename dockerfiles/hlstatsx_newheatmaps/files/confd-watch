@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -eo pipefail
+
+export ETCD_PORT=${ETCD_PORT:-4001}
+export HOST_IP=${HOST_IP:-172.17.42.1}
+export ETCD=$HOST_IP:$ETCD_PORT
+
+echo "[hlstatsx_heatmaps] booting container. ETCD: $ETCD."
+
+# Try to make initial configuration every 5 seconds until successful
+until confd -onetime -node $ETCD -config-file /etc/confd/conf.d/hlstatsx_heatmaps.toml; do
+    echo "[hlstatsx_heatmaps] waiting for confd to create initial hlstatsx configuration."
+    sleep 5
+done
+
+# Generate heatmaps and exit
+echo "[hlstatsx_heatmaps] starting heatmap generation service..."
+cd /usr/local/heatmaps
+./generate.sh

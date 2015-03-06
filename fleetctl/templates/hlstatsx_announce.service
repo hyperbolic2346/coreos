@@ -12,7 +12,7 @@ After=hlstatsx.service
 BindsTo=hlstatsx.service
 
 [Service]
-ExecStart=/bin/sh -c "while true; do etcdctl set /services/webservers/stats '{\"ip\": \"%H\",\"port\": \"8885\"}' --ttl 60;sleep 45;done"
+ExecStart=/bin/bash -c "MY_IP=`getent hosts %H|/usr/bin/cut -d\" \" -f1`; while true; do etcdctl set /services/webservers/stats '{\"ip\": \"'$MY_IP'\",\"port\": \"8885\"}' --ttl 60;sleep 45;done"
 ExecStop=/usr/bin/etcdctl rm /services/webservers/stats
 
 Restart=always
