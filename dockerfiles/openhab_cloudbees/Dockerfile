@@ -14,13 +14,13 @@ RUN wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=acc
 RUN tar -zxC /opt -f /tmp/jdk-7u67-linux-x64.tar.gz
 RUN ln -s /opt/jdk1.7.0_67 /opt/jdk7
 
-# Download Openhab 1.5.1
-ADD https://openhab.ci.cloudbees.com/job/openHAB/lastSuccessfulBuild/artifact/distribution/target/distribution-1.6.0-SNAPSHOT-runtime.zip /tmp/distribution-1.6.0-runtime.zip
-ADD https://openhab.ci.cloudbees.com/job/openHAB/lastSuccessfulBuild/artifact/distribution/target/distribution-1.6.0-SNAPSHOT-addons.zip /tmp/distribution-1.6.0-addons.zip
+# Download Openhab 1.7.0
+ADD https://openhab.ci.cloudbees.com/job/openHAB/lastSuccessfulBuild/artifact/distribution/target/distribution-1.7.0-SNAPSHOT-runtime.zip /tmp/distribution-1.7.0-runtime.zip
+ADD https://openhab.ci.cloudbees.com/job/openHAB/lastSuccessfulBuild/artifact/distribution/target/distribution-1.7.0-SNAPSHOT-addons.zip /tmp/distribution-1.7.0-addons.zip
 
 RUN mkdir -p /opt/openhab/addons-avail
-RUN unzip -d /opt/openhab /tmp/distribution-1.6.0-runtime.zip
-RUN unzip -d /opt/openhab/addons-avail /tmp/distribution-1.6.0-addons.zip
+RUN unzip -d /opt/openhab /tmp/distribution-1.7.0-runtime.zip
+RUN unzip -d /opt/openhab/addons-avail /tmp/distribution-1.7.0-addons.zip
 RUN chmod +x /opt/openhab/start.sh
 RUN mkdir -p /opt/openhab/logs
 

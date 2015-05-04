@@ -33,3 +33,4 @@ RestartSec=5
 
 [X-Fleet]
 Conflicts=insurgency_dedicated.service
+X-ConditionMachineMetadata=speed=fast

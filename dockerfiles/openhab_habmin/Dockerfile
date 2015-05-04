@@ -23,6 +23,8 @@ RUN rm /usr/local/bin/boot.sh
 ADD files/boot.sh /usr/local/bin/boot.sh
 RUN chmod +x /usr/local/bin/boot.sh
 
+RUN echo America/New_York > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
+
 # Clean up
 RUN rm -rf /tmp/*
 

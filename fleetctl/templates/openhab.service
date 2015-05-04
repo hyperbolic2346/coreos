@@ -19,7 +19,7 @@ ExecStartPre=-/usr/bin/docker kill openhab
 ExecStartPre=-/usr/bin/docker rm openhab
 ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
 ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/openhab"
-ExecStart=/bin/sh -c "/usr/bin/docker run --net host --name openhab --privileged=true -v /openhab_config:/opt/openhab/configurations -p 9001:9001 -p 8443:8443 -p 8080:8080 `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/openhab"
+ExecStart=/bin/sh -c "/usr/bin/docker run --net host --name openhab --privileged=true -v /openhab_config/boot.sh:/usr/local/bin/boot.sh -v /openhab_config/webapps:/opt/openhab/webapps -v /openhab_config/addons-avail:/opt/openhab/addons-avail -v /openhab_config/config:/etc/openhab -v /openhab_config/javaprefs:/root/.java -p 9001:9001 -p 8443:8443 -p 8080:8080 `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/openhab"
 
 Restart=always
 RestartSec=5

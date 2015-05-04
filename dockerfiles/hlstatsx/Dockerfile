@@ -20,4 +20,6 @@ RUN mkdir -p /etc/confd/conf.d /etc/confd/templates
 ADD files/confd-watch /usr/local/bin/confd-watch
 RUN chmod +x /usr/local/bin/confd-watch
 
+RUN echo America/New_York > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
+
 CMD ["/usr/local/bin/confd-watch"]

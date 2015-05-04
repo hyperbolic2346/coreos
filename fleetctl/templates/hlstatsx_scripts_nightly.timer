@@ -1,0 +1,13 @@
+[Unit]
+Description=Awards generation timer for insurgency
+Requires=docker.service
+
+[Timer]
+OnCalendar=00:01
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+[X-Fleet]
+X-ConditionMachineOf=hlstatsx_scripts_nightly.service

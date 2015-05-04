@@ -46,6 +46,42 @@ fi
 ######################
 # Launch
 
-# We're in a container with regular eth0 (default)
-cd /opt/openhab
-/opt/jdk7/bin/java -Dosgi.clean=true -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Djetty.port=8080 -Djetty.port.ssl=8443 -Djetty.home=. -Dlogback.configurationFile=configurations/logback.xml -Dfelix.fileinstall.dir=addons -Djava.library.path=lib -Djava.security.auth.login.config=./etc/login.conf -Dorg.quartz.properties=./etc/quartz.properties -Dequinox.ds.block_timeout=240000 -Dequinox.scr.waitTimeOnBlock=60000 -Dfelix.fileinstall.active.level=4 -Djava.awt.headless=true -jar ./server/plugins/org.eclipse.equinox.launcher_1.3.0.v20120522-1813.jar -console
+OPENHAB_CONF_DIR="/etc/openhab"
+OPENHAB_DIR="/opt/openhab"
+OPENHAB_WORKSPACE_DIR="/var/lib/openhab/workspace"
+OPENHAB_LOG_DIR="/var/log/openhab"
+JAVA="/opt/jdk7/bin/java"
+
+LAUNCHER=`ls ${OPENHAB_DIR}/server/plugins/org.eclipse.equinox.launcher_*.jar`
+
+# Exit if the package is not installed
+if [ ! -r "$LAUNCHER" ]; then
+	echo "launcher jar is missing"
+	exit 5
+fi
+
+JAVA_ARGS_DEFAULT="-Dosgi.clean=true \
+ -Declipse.ignoreApp=true \
+ -Dosgi.noShutdown=true \
+ -Djetty.port=8080 \
+ -Dopenhab.logdir="${OPENHAB_LOG_DIR}" \
+ -Dlogback.configurationFile="${OPENHAB_CONF_DIR}/configurations/logback.xml" \
+ -Dopenhab.configfile="${OPENHAB_CONF_DIR}/configurations/openhab.cfg" \
+ -Dopenhab.configdir="${OPENHAB_CONF_DIR}/configurations" \
+ -Djetty.home="${OPENHAB_DIR}" \
+ -Djetty.port.ssl=8443 \
+ -Djetty.config="${OPENHAB_CONF_DIR}/jetty" \
+ -Djetty.rundir="${OPENHAB_DIR}" \
+ -Dfelix.fileinstall.dir="${OPENHAB_DIR}/addons" \
+ -Djava.library.path="${OPENHAB_DIR}/lib" \
+ -Djava.security.auth.login.config="${OPENHAB_CONF_DIR}/login.conf" \
+ -Dorg.quartz.properties="${OPENHAB_CONF_DIR}/quartz.properties" \
+ -Dequinox.ds.block_timeout=240000 \
+ -Dequinox.scr.waitTimeOnBlock=60000 \
+ -Dfelix.fileinstall.active.level=4 \
+ -Djava.awt.headless=true \
+ -jar ${LAUNCHER} \
+ -data ${OPENHAB_WORKSPACE_DIR} \
+ -console"
+
+$JAVA $JAVA_ARGS_DEFAULT

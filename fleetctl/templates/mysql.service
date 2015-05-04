@@ -20,7 +20,7 @@ KillMode=none
 ExecStartPre=-/usr/bin/docker kill db
 ExecStartPre=-/usr/bin/docker rm db
 ExecStartPre=/usr/bin/docker pull mysql
-ExecStart=/usr/bin/docker run --name db -v /databases/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=ARZLdnvM5Bdf8pWj -e MYSQL_USER=motion -e MYSQL_PASSWORD=zTpvxKUFCYTGEZc7 -e MYSQL_DATABASE=motion -p 3306:3306 mysql
+ExecStart=/bin/sh -c "FILE=$(mktemp) ; echo echo -e 'America/New_York' > $FILE ; docker run -v $FILE:/etc/timezone -v /usr/share/zoneinfo/US/Eastern:/etc/localtime --name db -v /databases/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=ARZLdnvM5Bdf8pWj -e MYSQL_USER=motion -e MYSQL_PASSWORD=zTpvxKUFCYTGEZc7 -e MYSQL_DATABASE=motion -p 3306:3306 mysql"
 
 Restart=always
 RestartSec=5

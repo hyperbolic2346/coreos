@@ -1,9 +1,13 @@
 #!/bin/bash
 
-set -eo pipefail
-
 export ETCD_PORT=${ETCD_PORT:-4001}
-export HOST_IP=${HOST_IP:-172.17.42.1}
+host_shared_ip=$(ip addr | grep 'state UP' -A2 | grep '10.0.1.' | awk '{print $2}' | cut -f1 -d'/')
+if [ -z "$host_shared_ip" ]; then
+  # maybe it's just the docker interface, so we want the gateway
+  host_shared_ip=$(/sbin/ip route | awk '/default/ { print $3 }')
+fi
+
+export HOST_IP=$host_shared_ip
 export ETCD=$HOST_IP:$ETCD_PORT
 
 echo "[motion-script-updates] booting container. ETCD: $ETCD."

@@ -20,6 +20,7 @@ RUN chmod +x /usr/local/bin/confd-watch
 #ADD files/motion.tmpl /etc/confd/conf.d/motion.tmpl
 
 ADD files/motion.default.conf /etc/default/motion
+RUN echo America/New_York > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
 
 CMD ["/usr/local/bin/confd-watch"]
 

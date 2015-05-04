@@ -30,3 +30,4 @@ Restart=always
 
 [X-Fleet]
 Conflicts=gearman-client@*.service
+Conflicts=motion.service

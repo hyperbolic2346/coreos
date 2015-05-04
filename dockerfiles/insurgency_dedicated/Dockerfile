@@ -18,6 +18,8 @@ RUN chmod +x /usr/local/bin/confd-watch
 
 ADD files/cronfile /etc/cron.d/update_insurgency
 
+RUN echo America/New_York > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
+
 ENV HOME /srv/insurgency
 
 USER insurgency
