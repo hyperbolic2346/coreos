@@ -1,0 +1,24 @@
+#!/usr/bin/python2.7
+import os
+import time
+from os import system,path,unlink
+from sys import argv
+
+def add_ext(infile, newext):
+	root, ext = path.splitext(infile)
+	return root + "." + newext
+
+def insert_avi(infile):
+	system("/usr/bin/php /motion_scripts/encode_videos.php {}".format(infile))
+	system("chmod 644 {}".format(infile))
+
+def maybe_notify(infile):
+        current_time = time.localtime()
+        if current_time.tm_hour >= 9 and current_time.tm_hour <= 22:
+                outfile = add_ext(infile, 'webm')
+                outfile = outfile.replace('/fileserv/security_camera','http://gate.burntsheep.com/media')
+                system("sh /root/motion_scripts/send_gchat_movie_finished.sh {}".format(outfile))
+        system("sh /root/motion_scripts/xbmc-send-json5 'Ding Dong' 'Gate Cam found something!'")
+
+insert_avi(argv[1])
+#maybe_notify(argv[1])

@@ -11,14 +11,13 @@ RUN mkdir /tmp/hlstatsx && git clone https://github.com/jaredballou/insurgency-h
 RUN mv /tmp/hlstatsx/scripts /usr/src/hlstatsx
 RUN rm -rf /tmp/hlstatsx
 
-ADD https://github.com/kelseyhightower/confd/releases/download/v0.6.3/confd-0.6.3-linux-amd64 /usr/local/bin/confd
-RUN chmod +x /usr/local/bin/confd
-
-ADD files/cronfile /etc/con.d/hlstatsx
-
-ADD files/confd-watch /usr/local/bin/confd-watch
-RUN chmod +x /usr/local/bin/confd-watch
+ADD files/cronfile /etc/cron.d/hlstatsx
+ADD files/hlstats.conf /usr/src/hlstatsx/hlstats.conf
 
 RUN echo America/New_York > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
 
-CMD ["/usr/local/bin/confd-watch"]
+EXPOSE 27500/udp
+
+WORKDIR /usr/src/hlstatsx
+
+CMD ["./hlstats.pl", "--configfile=hlstats.conf", "--port=27500"]

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "starting cron..."
+cron -f &
+
+cd /srv/hurtworld
+
+# Start the hurtworld service using the generated config
+
+echo "[hurtworld] starting game server..."
+#exec script -c "./hwserver.sh start"
+./hwserver.sh start
+
+while true; do
+ sleep 1800
+done

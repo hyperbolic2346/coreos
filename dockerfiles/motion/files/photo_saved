@@ -1,0 +1,22 @@
+#!/usr/bin/python2.7
+import os
+import time
+from os import system,path,unlink
+from sys import argv
+
+def add_ext(infile, newext):
+	root, ext = path.splitext(infile)
+	return root + "." + newext
+
+def insert_avi(infile):
+	system("/usr/bin/php /motion_scripts/encode_image.php {}".format(infile))
+
+#def maybe_notify(infile, id):
+#	outfile = add_ext(infile, 'thumb.jpg')
+#	outfile = outfile.replace('/fileserv/security_camera','http://gate.burntsheep.com/media')
+#	system("./xbmc-send-json5 'Ding Dong' 'Gate Cam found something!' {}".format(outfile))
+#	system("/usr/bin/curl http://127.0.0.1:8888/added?id={}\&thumbnail={}".format(id, infile.replace('/fileserv/security_camera', '/media')))
+
+insert_avi(argv[1])
+#maybe_notify(argv[1], argv[2])
+
