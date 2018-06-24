@@ -7,6 +7,6 @@ RUN chmod +x /usr/local/bin/confd
 ADD files/confd-watch /usr/local/bin/confd-watch
 RUN chmod +x /usr/local/bin/confd-watch
 
-RUN echo America/New_York > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
+RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata
 
 CMD ["/usr/local/bin/confd-watch"]

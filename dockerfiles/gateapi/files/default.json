@@ -1,0 +1,15 @@
+{
+  "dbConfig": {
+    "host": "10.0.1.19",
+    "port": 3306,
+    "dbName": "motion",
+    "user": "motion",
+    "password": "zTpvxKUFCYTGEZc7"
+  },
+  "secret": "E8A31583B5E96B285AC12F283B92D05228E8ABE557EDDF02964D59D6BE7E5124",
+  "gate": {
+    "ip": "10.0.1.25",
+    "gates_url": "/arduino/gates",
+    "gate_url": "/arduino/gate/"
+  }
+}

@@ -1,0 +1,17 @@
+<VirtualHost *:80>
+        DocumentRoot /config/data/www/
+        DirectoryIndex index.php
+	<Directory "/config/data/www">
+		AllowOverride All
+		Options Indexes FollowSymLinks
+        	Require all granted
+	</Directory>
+
+        ScriptAlias /cgi-bin/ /config/data/cgi-bin/
+        <Directory "/config/data/cgi-bin">
+                AllowOverride None
+                Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+		require all granted
+        </Directory>
+
+</VirtualHost>

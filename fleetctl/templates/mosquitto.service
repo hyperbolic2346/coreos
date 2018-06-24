@@ -11,9 +11,8 @@ Requires=docker.service
 TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill mosquitto
 ExecStartPre=-/usr/bin/docker rm mosquitto
-ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
-ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/mosquitto"
-ExecStart=/bin/sh -c "/usr/bin/docker run --net host --name mosquitto -v /docker_configs/mosquitto:/etc/mosquitto -p 9003:9003 `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/mosquitto"
+ExecStartPre=/usr/bin/docker pull localhost:5000/mosquitto
+ExecStart=/bin/sh -c "/usr/bin/docker run --net host --name mosquitto -v /docker_configs/mosquitto:/etc/mosquitto -p 9003:9003 localhost:5000/mosquitto
 
 Restart=always
 RestartSec=5

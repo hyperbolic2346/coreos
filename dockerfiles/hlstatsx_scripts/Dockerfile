@@ -13,8 +13,11 @@ RUN rm -rf /tmp/hlstatsx
 
 ADD files/cronfile /etc/cron.d/hlstatsx
 ADD files/hlstats.conf /usr/src/hlstatsx/hlstats.conf
+ADD files/hlstats.pl /usr/src/hlstatsx/hlstats.pl
 
-RUN echo America/New_York > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
+RUN chmod a+rx /usr/src/hlstatsx/hlstats.pl
+
+RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata
 
 EXPOSE 27500/udp
 

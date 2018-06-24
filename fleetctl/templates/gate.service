@@ -18,9 +18,8 @@ KillMode=none
 
 ExecStartPre=-/usr/bin/docker kill gate
 ExecStartPre=-/usr/bin/docker rm gate
-ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
-ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/gate"
-ExecStart=/bin/sh -c "/usr/bin/docker run -p 8880:80 --name gate -v /docker_configs/gate/site:/var/www -v /security_camera:/var/www/docs/media -v /docker_configs/gate/confd:/etc/confd `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/gate"
+ExecStartPre=/bin/sh -c "/usr/bin/docker pull localhost:5000/gate
+ExecStart=/bin/sh -c "/usr/bin/docker run -p 8880:80 --name gate -v /docker_configs/gate/site:/var/www -v /security_camera:/var/www/docs/media localhost:5000/gate"
 
 Restart=always
 RestartSec=5

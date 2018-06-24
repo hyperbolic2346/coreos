@@ -1,29 +1,5 @@
 #!/bin/bash
 
-export ETCD_PORT=${ETCD_PORT:-4001}
-
-host_shared_ip=$(ip addr | grep 'state UP' -A2 | grep '10.0.1.' | awk '{print $2}' | cut -f1 -d'/')
-if [ -z "$host_shared_ip" ]; then
-  # maybe it's just the docker interface, so we want the gateway
-  host_shared_ip=$(/sbin/ip route | awk '/default/ { print $3 }')
-fi
-
-export HOST_IP=$host_shared_ip
-export ETCD=$HOST_IP:$ETCD_PORT
-
-echo "[gate] booting container. ETCD: $ETCD."
-
-# Try to make initial configuration every 5 seconds until successful
-until confd -onetime -node $ETCD -config-file /etc/confd/conf.d/gate.toml; do
-    echo "[apache] waiting for confd to create initial gate configuration."
-    sleep 5
-done
-
-# Put a continual polling `confd` process into the background to watch
-# for changes every 10 seconds
-confd -interval 10 -node $ETCD -config-file /etc/confd/conf.d/gate.toml &
-echo "[gate] confd is now monitoring etcd for changes..."
-
 chown www-data:www-data /app -R
 source /etc/apache2/envvars
 

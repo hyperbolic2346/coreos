@@ -18,9 +18,8 @@ KillMode=none
 
 ExecStartPre=-/usr/bin/docker kill upnp-%p%i
 ExecStartPre=-/usr/bin/docker rm upnp-%p%i
-ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
-ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/upnp"
-ExecStart=/bin/sh -c "/usr/bin/docker run --net=host --name upnp-%p%i -e 'UDP_FORWARDING_ONLY=yes' -e 'HOST_TO_MONITOR=%p' -e 'PORT_TO_MONITOR=%i' `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/upnp"
+ExecStartPre=/usr/bin/docker pull localhost:5000/upnp
+ExecStart=/usr/bin/docker run --net=host --name upnp-%p%i -e 'UDP_FORWARDING_ONLY=yes' -e 'HOST_TO_MONITOR=%p' -e 'PORT_TO_MONITOR=%i' localhost:5000/upnp
 
 Restart=always
 RestartSec=5

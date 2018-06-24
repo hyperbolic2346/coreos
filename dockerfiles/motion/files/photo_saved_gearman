@@ -1,0 +1,30 @@
+#!/usr/bin/python
+import os
+import time
+import gearman
+from os import system,path,unlink
+from sys import argv
+from gearman.constants import PRIORITY_NONE, JOB_UNKNOWN, JOB_PENDING, JOB_CREATED, JOB_FAILED, JOB_COMPLETE
+
+def check_request_status(job_request):
+    if job_request.complete:
+        print "Job %s finished!  Result: %s - %s" % (job_request.job.unique, job_request.state, job_request.result)
+    elif job_request.timed_out:
+        print "Job %s timed out!" % job_request.unique
+    elif job_request.state == JOB_UNKNOWN:
+        print "Job %s connection failed!" % job_request.unique
+
+gm_client = gearman.GearmanClient(['gearmand:4730'])
+
+thumbnail = os.path.splitext(argv[1])[0] + ".thumb.jpg"
+print "%s -> %s" % (argv[1], thumbnail)
+
+kw = '{"in":"' + argv[1] + '","out":"' + thumbnail + '"}'
+
+completed_job_request = gm_client.submit_job("generate_image", kw, background=False, wait_until_complete=False)
+while (completed_job_request.timed_out or completed_job_request.state == JOB_UNKNOWN):
+  print "Unable to submit job, retrying in 5 seconds..."
+  sleep(5)
+  completed_job_request = gm_client.submit_job("generate_image", kw, background=False, wait_until_complete=False)
+
+check_request_status(completed_job_request)

@@ -1,0 +1,38 @@
+#!/usr/bin/python
+import os
+import time
+import gearman
+from sys import argv
+from gearman.constants import PRIORITY_NONE, JOB_UNKNOWN, JOB_PENDING, JOB_CREATED, JOB_FAILED, JOB_COMPLETE
+
+def check_request_status(job_request):
+    if job_request.complete:
+        print "Job %s finished!  Result: %s - %s" % (job_request.job.unique, job_request.state, job_request.result)
+    elif job_request.timed_out:
+        print "Job %s timed out!" % job_request.unique
+    elif job_request.state == JOB_UNKNOWN:
+        print "Job %s connection failed!" % job_request.unique
+
+gm_client = gearman.GearmanClient(['gearmand:4730'])
+
+ipad_filename = os.path.splitext(argv[1])[0] + ".ipad.mp4"
+webm_filename = os.path.splitext(argv[1])[0] + ".webm"
+
+list_of_jobs = [dict(task="encode_ipad_video", data='{"in":"' + argv[1] + '","out":"' + ipad_filename + '"}'), dict(task="encode_webm_video", data='{"in":"' + argv[1] + '","out":"' + webm_filename + '"}')]
+
+print "%s -> %s" % (argv[1], ipad_filename)
+print "%s -> %s" % (argv[1], webm_filename)
+
+completed_job_requests = []
+
+while (len(list_of_jobs) > 0):
+  submitted_jobs = gm_client.submit_multiple_jobs(list_of_jobs, background=False, wait_until_complete=False)
+  list_of_jobs = [job_request for job_request in submitted_jobs if job_request.timed_out or job_request.state == JOB_UNKNOWN]
+  completed_job_requests += [job_request for job_request in submitted_jobs if not(job_request.timed_out) and job_request.state != JOB_UNKNOWN] 
+
+  if (len(list_of_jobs) > 0):
+    print "Unable to submit job, retrying in 5 seconds..."
+    sleep(5)
+
+for completed_job_request in completed_job_requests:
+    check_request_status(completed_job_request)

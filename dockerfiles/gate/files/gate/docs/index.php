@@ -87,7 +87,7 @@ if (isset($_REQUEST['edit_user_id']) && isset($_SESSION['user']) && $_SESSION['u
 		$first = false;
 		foreach ($event_ids as $id) {
 			if ($first == true) {
-				$query .= ' OR ';
+				$query .= ' OR event_id = ';
 			} else {
 				$first = true;
 			}

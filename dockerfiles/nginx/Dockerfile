@@ -11,9 +11,6 @@ RUN chmod +x /usr/local/bin/confd
 
 RUN mkdir -p /etc/confd/conf.d /etc/confd/templates
 
-#ADD files/nginx.toml /etc/confd/conf.d/nginx.toml
-#ADD files/nginx.tmpl /etc/confd/templates/nginx.tmpl
-
 ADD files/confd-watch /usr/local/bin/confd-watch
 RUN chmod +x /usr/local/bin/confd-watch
 

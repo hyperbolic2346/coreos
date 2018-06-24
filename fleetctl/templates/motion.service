@@ -21,10 +21,8 @@ KillMode=none
 
 ExecStartPre=-/usr/bin/docker kill motion
 ExecStartPre=-/usr/bin/docker rm motion
-ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/docker/repo/host 2>&1 >/dev/null| grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
-ExecStartPre=/bin/sh -c "while [ `etcdctl ls /services/mysql/host 2>&1 >/dev/null|grep 'Key not found' | wc -l` -eq 1 ]; do sleep 5; done"
-ExecStartPre=/bin/sh -c "/usr/bin/docker pull `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/motion"
-ExecStart=/bin/sh -c "/usr/bin/docker run --name motion --net=host -v /docker_configs/motion/motion_scripts:/motion_scripts -v /docker_configs/motion/confd:/etc/confd -v /docker_configs/motion/etc:/etc/motion -v /security_camera:/fileserv/security_camera `etcdctl get /services/docker/repo/host`:`etcdctl get /services/docker/repo/port`/motion"
+ExecStartPre=/usr/bin/docker pull localhost:5000/motion
+ExecStart=/usr/bin/docker run --rm --name motion --net=host -v /docker_configs/motion/motion_scripts:/motion_scripts -v /docker_configs/motion/etc:/etc/motion -v /security_camera:/fileserv/security_camera localhost:5000/motion
 
 ExecStop=/usr/bin/docker stop motion
 
@@ -32,5 +30,4 @@ Restart=always
 RestartSec=5
 
 [X-Fleet]
-Conflicts=insurgency_dedicated.service
 X-ConditionMachineMetadata=speed=fast
